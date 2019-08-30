@@ -12,7 +12,7 @@ const goods = [
     title: 'Shoes', price: 250
   }
 ];
-
+ 
 const renderGoodsItem = (title, price) => {
   return `<div class="goods-item"><h3>${title}</h3><p>${price}</p></div>`;
 };
