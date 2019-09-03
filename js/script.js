@@ -60,17 +60,46 @@ class GoodsItem {
      */
     getTotalPriceGoods(){
         return this.goods.reduce((acc,item)=>{
+            /**проверям на число */
             let isNumber =item.price!='No price' && item.price!=undefined
             return acc += isNumber ? Number(item.price) : 0;
         }, 0)
     }
   }
+  /**расширения для товаров в корзине */
+  class GoodsBasketItem extends GoodsItem {
+      constructor(title, price, count=1){
+          super(title,price);
+          this.count=count;
+      }
+      
+  }
+/**класс корзины */
+  class Basket{
+      constructor(goods =[]){
+          this.goods =goods;
+      }
+      /**инициализация передача других объектов, создание в DOM */
+      init(){}
+      /** добавить в корзину товар*/
+      addGood(Goodsitem, count =1){}
+      /**удалить из корзины товар */
+      delGood(GoodsItem, count =1){}
+      /**изменить количество товара */
+      setCountGood(){}
+      /**очистить корзину */
+      clearBasket(){}
+      /**посчитать стоимость */
+      totalPriceGoods(){}
+      /** обновления в DOM */
+      render(){}
+  };
   
   
   document.addEventListener('DOMContentLoaded', ()=>{
     const list = new GoodsList('.goods-list');
     list.fetchGoods();
     list.render();
-    console.log(list.getTotalPriceGoods());
+    console.log(list.getTotalPriceGoods()); //тест функции getTotalPriceGoods
   }, false)
   
