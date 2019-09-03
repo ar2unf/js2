@@ -24,6 +24,7 @@ class GoodsItem {
       this.title = title;
       this.price = price;
     }
+    /** рендер товара */
     render() {
       return `<div class="goods-item"><h3>${this.title}</h3><p>${this.price}</p></div>`;
     }
@@ -34,6 +35,7 @@ class GoodsItem {
       this.container = container;
       this.goods = [];
     }
+    /**заполняем массив */
     fetchGoods() {
       this.goods = [
         {title: 'Shirt', price: 150},
@@ -44,11 +46,23 @@ class GoodsItem {
         {title: 'lambutens'}
       ];
     }
+    /**
+     * рендер списка товаров
+     */
     render() {
       document.querySelector(this.container).innerHTML = this.goods.reduce((acc, item) => {
         const good = new GoodsItem(item.title, item.price);
         return acc += good.render();
       }, '');
+    }
+    /**
+     * метод определяющий суммарную соимость товаров списка
+     */
+    getTotalPriceGoods(){
+        return this.goods.reduce((acc,item)=>{
+            let isNumber =item.price!='No price' && item.price!=undefined
+            return acc += isNumber ? Number(item.price) : 0;
+        }, 0)
     }
   }
   
@@ -57,5 +71,6 @@ class GoodsItem {
     const list = new GoodsList('.goods-list');
     list.fetchGoods();
     list.render();
+    console.log(list.getTotalPriceGoods());
   }, false)
   
