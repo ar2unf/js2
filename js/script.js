@@ -93,6 +93,8 @@ class GoodsItem {
       totalPriceGoods(){}
       /** обновления в DOM */
       render(){}
+      /**проверка на пустоту для активации заказа */
+      isOrder(){}
   };
   
   
