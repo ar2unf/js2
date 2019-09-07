@@ -1,21 +1,76 @@
-const goods = [
-    {title: 'Shirt', price: 150},
-    {title: 'Socks', price: 50},
-    {title: 'Jacket', price: 350},
-    {title: 'Shoes', price: 250},
-];
+const BASE_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
-const renderGoodsItem = (title ='goods', price =0) =>  // уберем return укажем значения по умочанию
-    `<div class="goods-item">
-      <h3>${title}</h3>
-      <p>${price}</p>
-    </div>`;
+function makeGETRequest(url, callback) {
+  const xhr = window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject('Microsoft.XMLHTTP');
 
-const renderGoodsList = list => { //уберем скобки
-    const goodsList = list.map(item => renderGoodsItem(item.title, item.price));
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      callback(xhr.responseText)
+    }
+  };
 
-        /*document.querySelector('.goods-list').innerHTML = goodsList;*/ // выводит массив с запятыми
-    document.querySelector('.goods-list').innerHTML = goodsList.join(''); // преобразуем массив в строку без разделителей
+  xhr.open('GET', url);
+  xhr.send();
 }
 
-window.onload = () => renderGoodsList(goods); // уберем фигурные скобки
+
+
+
+class GoodsItem {
+  constructor(title = 'No name', price = 'No price') {
+    this.title = title;
+    this.price = price;
+  }
+  render() {
+    return `<div class="goods-item"><h3>${this.title}</h3><p>${this.price}</p></div>`;
+  }
+}
+
+class GoodsList {
+  constructor(container = '.container') {
+    this.container = container;
+    this.goods = [];
+  }
+  totalPrice() {
+    return this.goods.reduce((total, good) => {
+      if (!good.price) return total;
+      return total += good.price;
+    }, 0);
+  }
+  fetchGoods(cb) {
+    makeGETRequest(`${BASE_URL}/catalogData.json`, (goods) => {
+      this.goods = JSON.parse(goods);
+      cb();
+    });
+  }
+  render() {
+    document.querySelector(this.container).innerHTML = this.goods.reduce((acc, item) => {
+      const good = new GoodsItem(item.product_name, item.price);
+      return acc += good.render();
+    }, '');
+  }
+}
+
+class Cart extends GoodsList {
+  add(good) {}
+  remove(id) {
+    if (!id) {
+      // clean cart
+      return;
+    }
+  }
+  update(id, good) {}
+}
+
+class CartItem extends GoodsItem {
+  constructor(title = 'No name', price = 'No price', count = 1) {
+    super(title, price);
+    this.count = count;
+  }
+}
+
+
+const list = new GoodsList('.goods-list');
+list.fetchGoods(() => {
+  list.render();
+});
