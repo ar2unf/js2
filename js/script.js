@@ -13,6 +13,16 @@ function makeGETRequest(url, callback) {
   xhr.send();
 }
 
+function makeGETRequest(url){
+  return new Promise((resolve, reject)=>{
+    let xhr = window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject;
+        xhr.open("GET", url, true);
+        xhr.onload = () => resolve(xhr.responseText);
+        xhr.onerror = () => reject(xhr.statusText);
+        xhr.send();
+  })
+}
+
 
 class GoodsItem {
   constructor(title = 'No name', price = 'No price') {
