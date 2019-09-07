@@ -1,6 +1,6 @@
 const BASE_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
-function makeGETRequest(url, callback) {
+/*function makeGETRequest(url, callback) {
   const xhr = window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject('Microsoft.XMLHTTP');
 
   xhr.onreadystatechange = function () {
@@ -11,7 +11,7 @@ function makeGETRequest(url, callback) {
 
   xhr.open('GET', url);
   xhr.send();
-}
+}*/
 
 function makeGETRequest(url){
   return new Promise((resolve, reject)=>{
@@ -45,15 +45,43 @@ class GoodsList {
       return total += good.price;
     }, 0);
   }
-  fetchGoods(cb) {
+  /*fetchGoods(cb) {
     makeGETRequest(`${BASE_URL}/catalogData.json`, (goods) => {
       this.goods = JSON.parse(goods);
       cb();
     });
+  }*/
+  /*fetchGoods(cb){
+    makeGETRequest(`${BASE_URL}/catalogData.json`)
+    .then(response=>{
+      this.goods =JSON.parse(response);
+    }, reject=>{
+      console.log(reject);
+
+    })
+    .then (()=>cb())
+  }*/
+  fetchGood (){
+    return new Promise((resolve, reject)=>{
+      makeGETRequest(`${BASE_URL}/catalogData.json`)
+        .then(response=>{
+            this.goods =JSON.parse(response);
+          resolve(true);
+        }, reject=>{
+            console.log(reject);
+          resolve(false);
+          reject(reject);
+        })
+    })
   }
+
+
+
+
   render() {
     document.querySelector(this.container).innerHTML = this.goods.reduce((acc, item) => {
       const good = new GoodsItem(item.product_name, item.price);
+      
       return acc += good.render();
     }, '');
   }
@@ -79,6 +107,9 @@ class CartItem extends GoodsItem {
 
 
 const list = new GoodsList('.goods-list');
-list.fetchGoods(() => {
-  list.render();
-});
+list.fetchGood()
+.then(respone => {
+  if (respone){
+    list.render();
+  }
+})
