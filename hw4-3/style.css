@@ -1,0 +1,86 @@
+
+* {
+    border: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 18px;
+    line-height: 130%;
+}
+
+.form,
+form {
+    display: block;
+    width: 500px;
+    border-radius: 10px;
+    margin: 40px auto;
+    padding: 10px;
+    box-shadow: black 0 0 10px;
+}
+label {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+input {
+    display: block;
+    width: 100%;
+    border-radius: 5px;
+    margin: 5px;
+    padding: 10px;
+    border: #ccc solid 3px;
+    background: #ccc;
+    box-shadow: #ccc inset 0 0 100px 100px;
+}
+textarea {
+    display: block;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin: 4px;
+    padding: 10px;
+    border: #ccc solid 3px;
+    background: #ccc;
+    box-shadow: #ccc inset 0 0 100px 100px;
+}
+
+button {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    color: #fff;
+    background: green;
+}
+button:hover {
+    background: blue;
+}
+
+small.error {
+    display: none;
+    margin: 10px;
+    color: red;
+}
+.done input,
+.done textarea {
+    border: green solid 3px;
+}
+.error input,
+.error textarea {
+    position: relative;
+    border: red solid 3px;
+}
+.error > small.error {
+    display: block;
+}
+
+small {
+    display: block;
+    width: 100%;
+    font-size: 10px;
+    line-height: 100%;
+    margin-top: 2rem;
+    color: #ccc;
+}
