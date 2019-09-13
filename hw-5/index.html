@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <title>eShop</title>
+</head>
+
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="search">
+                <form class="goods-search-from">
+                    <input type="text" class="goods-search" v-model="searchLine" v-on:keydown.enter.prevent="filterGoods" placeholder="Введите и нажмите Искать" />
+                    <button class="search-button" v-on:click.prevent="filterGoods">Искать</button>
+                </form>
+            </div>
+            <div class="basket_block">
+                <button class="cart-button" @click.prevent="isVisibleCart=!isVisibleCart">Корзина</button>
+                <div class="basket" v-bind:class="{ active: isVisibleCart }">
+                    <template v-if="basketGoods.length == 0">
+                        <h3 class="goods-null"> В корзине нет товаров</h3>
+                    </template>
+                    <p class="totalCart" v-bind:class="{ hide: isBasketEmpty }">{{totalPriceMessage}}</p>
+                    <div class="basket-list">
+                        <div class="basket-list-item" v-for="good in basketGoods">
+                            <div class="basket-list-item-info">
+                                <h4>{{ good.product_name }}</h3>
+                                    <p>{{good.price}}$</p>
+
+                                    <p>{{good.quantity}}&nbsp;шт.</p>
+                            </div>
+                            <button @click.prevent="delitemCart(good.id_product)" :data-id=good.id_product>Удалить</button>
+                        </div>
+                    </div>
+                    <button @click.prevent="delitemCart()" v-bind:class="{ hide: isBasketEmpty }">Очистить корзину</button>
+                </div>
+            </div>
+        </header>
+        <main class="content">
+            <div class="goods-list">
+                <div class="goods-item" v-for="good in filteredGoods">
+                    <h3>{{ good.product_name }}</h3>
+                    <p>{{ good.price }}$</p>
+                    <button @click="addCart(good)" :data-id=good.id_product>Добавить в корзину</button>
+                </div>
+                <template v-if="filteredGoods.length == 0">
+                  <h3 class="goods-null"> Товары не найдены</h3>
+              </template>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
