@@ -89,6 +89,7 @@ const app = new Vue({
                     if (!goodIsalreadyBasket) {
                         good.quantity = 1;
                         this.basketGoods.push(good);
+                        goodIsalreadyBasket = false;
                     }
                     this.isBasketEmpty = this.basketGoods.length > 0 ? false : true;
                     this.basketGoodsTotalprice = this.totalPrice(this.basketGoods);
