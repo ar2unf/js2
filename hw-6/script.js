@@ -1,0 +1,287 @@
+const BASE_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
+
+Vue.component('error-message',{
+    props:['visible'],
+    template:`<div class="errorload" v-bind:class="{ hide: !visible }">
+                <span>Возникла ошибка при загрузке страницы</span>
+            </div>`
+})
+
+/**
+ * Компоненты каталога товаров
+ */
+Vue.component('goods-item', {
+    props: ['good'],
+    methods: {
+        add() {
+            this.$emit('add', this.good);
+        }
+    },
+    template: `<div class="goods-item">
+                    <h3>{{ good.product_name }}</h3>
+                    <p>{{ good.price }}$</p>
+                    <button @click.prevent="add">Добавить в корзину</button>
+                </div>`
+});
+
+Vue.component('goods-list', {
+    props: ['goods'],
+    computed: {
+        isGoodNotEmpty() {
+            return this.goods.length > 0;
+        }
+    },
+    methods: {
+        addTo(id_product) {
+            this.$emit('add', id_product);
+        }
+    },
+    template: `<div class="goods-list" v-if="isGoodNotEmpty">
+                    <goods-item v-for="good in goods" @add="addTo"
+                    :good="good" :key="good.id_product"></goods-item>
+                </div>
+                <div v-else>
+                  <h3 class="goods-null"> Товары не найдены</h3>
+              </div>`
+});
+
+/**
+ * Компоненты корзины
+ */
+Vue.component('basket', {
+    props: ['basketgoods', 'is_basket_empty', 'total_price_message', 'is_visible_cart'],
+    methods: {
+        visibility_triger() {
+            this.$emit('visible_cart', true);
+        },
+        del_items(id_product) {
+            this.$emit('del_item_cart', id_product);
+        },
+    },
+    template: `<div class="basket_block">
+                    <button class="cart-button" @click.prevent="visibility_triger()">Корзина</button>
+                    <div class="basket" v-bind:class="{ active: is_visible_cart }">
+                        <basket-content  @del_item_cart="del_items" :basketgoods="basketgoods" :is_basket_empty="is_basket_empty" :total_price_message="total_price_message"></basket-content>
+                    </div>
+                </div>`
+})
+
+
+Vue.component('basket-content', {
+    props: ['basketgoods', 'is_basket_empty', 'total_price_message'],
+    methods: {
+        del_items(id_product) {
+            this.$emit('del_item_cart', id_product);
+        }
+    },
+    template: ` <div >
+                    <template v-if="basketgoods.length == 0">
+                        <h3 class="goods-null"> В корзине нет товаров</h3>
+                    </template>
+                    <p class="totalCart" v-bind:class="{ hide: is_basket_empty }">{{total_price_message}}</p>
+                    <div class="basket-list">
+                        <basket-list @del_item_cart="del_items" v-bind:basketgoods="basketgoods"></basket-list>
+                    </div>
+                    <button @click="del_items(0)" v-bind:class="{ hide: is_basket_empty }">Очистить корзину</button>
+                </div>`
+
+})
+
+Vue.component('basket-list', {
+    props: ['basketgoods'],
+    methods: {
+        del_items(id_product) {
+            this.$emit('del_item_cart', id_product);
+        }
+    },
+    template: `<div class="basket-list" >
+                <basket-item @del_item_cart="del_items" v-for="basketgood in basketgoods" :basketgood="basketgood" :key="basketgood.id_product"></basket-item>
+                </div>`
+
+});
+
+Vue.component('basket-item', {
+    props: ['basketgood'],
+    methods: {
+        del_items() {
+            this.$emit('del_item_cart', this.basketgood.id_product);
+        }
+    },
+    template: `<div class="basket-list-item">
+                    <div class="basket-list-item-info">
+                        <h4>{{ basketgood.product_name }}</h4>
+                        <p>{{basketgood.price}}$</p>
+                        <p>{{basketgood.quantity}}&nbsp;шт.</p>
+                    </div>
+                    <button @click="del_items" :data-id=basketgood.id_product>Удалить</button>
+                </div>`
+
+});
+
+/**
+ * компонет поиска
+ */
+Vue.component('search', {
+    props: ['value'],
+    template: `<input type="text" class=" search goods-search" 
+                    v-bind:value="value"
+                    v-on:input="$emit('input',$event.target.value)"
+                    placeholder="Введите и нажмите Искать" />`
+
+})
+
+const app = new Vue({
+    el: '#app',
+    data: {
+        goods: [],
+        filteredGoods: [],
+        searchLine: '',
+        isVisibleCart: false,
+        isBasketEmpty: true,
+        basketGoods: [],
+        basketGoodsTotalprice: 0,
+        totalPriceMessage: '',
+        isError: false
+
+    },
+    mounted() {
+        this.getCatalog();
+        this.getCart();
+    },
+    methods: {
+        makeGETRequest(url) {
+            return new Promise((resolve, reject) => {
+                const xhr = window.XMLHttpRequest ? new window.XMLHttpRequest() : new window.ActiveXObject('Microsoft.XMLHTTP');
+                xhr.onreadystatechange = function() {
+                  //  console.log(xhr.status)
+                    if (xhr.readyState === 4) {
+                        
+                        if (xhr.status !== 200) {
+                            this.isError=true;
+                            console.log (this.isError   )
+                            reject(xhr.status);
+                        } else{
+                            const response = JSON.parse(xhr.responseText);
+                            resolve(response);
+                        }
+                        
+                    }
+                };
+                xhr.onerror = function(e) {
+                    reject(e);
+                };
+                xhr.open('GET', url);
+                xhr.send();
+            });
+        },
+        filterGoods() {
+            console.log(this.searchLine);
+            let rexp = new RegExp(this.searchLine, 'i');
+            this.filteredGoods = this.goods.filter(good => rexp.test(good.product_name));
+            console.log(this.filteredGoods);
+        },
+        getCatalog() {
+            this.makeGETRequest(`${BASE_URL}/catalogData.json`).then((goods) => {
+                this.goods = goods;
+                this.filteredGoods = goods;
+                console.log(this.filteredGoods);
+            }).catch(err => {
+                this.isError=true;
+                //console.error(err);
+                
+            });
+        },
+        getCart() {
+            this.makeGETRequest(`${BASE_URL}/getBasket.json`).then((basket) => {
+                console.log(basket);
+                this.basketGoodsTotalprice = basket.amount;
+                this.basketGoods = basket.contents;
+                this.getTotalCartPriceMesage(this.basketGoodsTotalprice);
+                this.isBasketEmpty = this.basketGoods.length > 0 ? false : true;
+            }).catch(err => {
+               // console.error(err);
+                
+            });
+
+        },
+        totalPrice(goods) {
+            return goods.reduce((total, good) => {
+                if (!good.price) return total;
+                return total += good.price * good.quantity;
+            }, 0);
+        },
+        getTotalCartPriceMesage(total) {
+            this.totalPriceMessage = `В корзине товаров на сумму ${total}$`;
+        },
+        addCart(good) {
+            this.makeGETRequest(`${BASE_URL}/addToBasket.json`).then(response => {
+                if (response) {
+
+                    goodIsalreadyBasket = false;
+                    this.basketGoods.forEach(item => {
+                        console.log(good);
+                        console.log(this.basketGoods);
+                        let thisId = good.id_product
+
+                        if (thisId == item.id_product) {
+                            console.log()
+                            item.quantity += 1;
+                            console.log("item.quantity" + item.quantity);
+                            console.log("good.quantity" + good.quantity);
+                            goodIsalreadyBasket = true;
+                            return;
+                        }
+                    })
+                    if (!goodIsalreadyBasket) {
+                        good.quantity = 1;
+                        this.basketGoods.push(good);
+                        goodIsalreadyBasket = false;
+                    }
+                    this.isBasketEmpty = this.basketGoods.length > 0 ? false : true;
+                    this.basketGoodsTotalprice = this.totalPrice(this.basketGoods);
+                    console.log(this.basketGoodsTotalprice);
+                    this.getTotalCartPriceMesage(this.basketGoodsTotalprice);
+                    //this.basketGoods.push(good);
+                    console.log(response);
+                    console.log(good);
+                    console.log(this.basketGoods);
+                } else {
+                    console.error("Не удалось добавить товар");
+
+                }
+            }).catch(err => console.error(err));
+        },
+        delitemCart(id) {
+            this.makeGETRequest(`${BASE_URL}/deleteFromBasket.json`).then(response => {
+                if (response) {
+                    if (!id) {
+                        this.basketGoods = [];
+                        this.basketGoodsTotalprice = this.totalPrice(this.basketGoods);
+                        this.getTotalCartPriceMesage(this.basketGoodsTotalprice);
+                        this.isBasketEmpty = this.basketGoods.length > 0 ? false : true;
+                        return;
+                    }
+                    let idItem;
+                    this.basketGoods.forEach((item, i) => {
+                        let thisId = item.id_product;
+                        if (id == thisId) {
+                            idItem = i;
+                        }
+                    });
+                    this.basketGoods.splice(idItem, 1);
+                    this.isBasketEmpty = this.basketGoods.length > 0 ? false : true;
+                    this.basketGoodsTotalprice = this.totalPrice(this.basketGoods);
+                    this.getTotalCartPriceMesage(this.basketGoodsTotalprice);
+                } else {
+                    console.error("Не удалось удалить товар");
+
+                }
+            }).catch(err => {
+                console.error(err);
+
+            });
+            //deleteFromBasket.json
+
+        }
+    }
+});
